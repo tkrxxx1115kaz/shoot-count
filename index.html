@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>シュートカウンター</title>
+    <link rel="manifest" href="manifest.json">
+    <script>
+      if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js'); }
+    </script>
+    <style>
+        * { touch-action: manipulation; -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none; }
+        body { font-family: -apple-system, sans-serif; text-align: center; background-color: #f0f2f5; margin: 0; padding: 10px; overflow: hidden; }
+        .container { background: white; padding: 15px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-width: 340px; margin: auto; }
+        #timer { font-size: 2.5rem; font-weight: bold; margin: 5px 0; color: #2c3e50; }
+        #total { font-size: 4.5rem; font-weight: bold; color: #333; line-height: 1; margin: 0; }
+        .results { display: flex; justify-content: space-around; margin: 10px 0; font-size: 1.2rem; font-weight: bold; }
+        .rate-box { font-size: 1.8rem; font-weight: bold; color: #e67e22; margin-bottom: 10px; }
+        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        button { -webkit-appearance: none; padding: 15px 0; font-size: 1.2rem; font-weight: bold; border: none; border-radius: 12px; color: white; }
+        button:active { opacity: 0.6; transform: scale(0.96); }
+        .start { background-color: #3498db; grid-column: span 2; }
+        .stop { background-color: #f1c40f; color: #333; grid-column: span 2; display: none; }
+        .in { background-color: #2ecc71; }
+        .out { background-color: #e74c3c; }
+        .reset { background-color: #bdc3c7; grid-column: span 2; margin-top: 10px; font-size: 0.9rem; padding: 8px; color: white; }
+        button:disabled { background-color: #ccc !important; opacity: 0.3; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div id="timer">00:00.0</div>
+    <div style="color:#666; font-size: 0.9rem; font-weight:bold;">TOTAL SHOTS</div>
+    <div id="total">0</div>
+    <div class="results">
+        <div style="color:#2ecc71">IN: <span id="in-count">0</span></div>
+        <div style="color:#e74c3c">OUT: <span id="out-count">0</span></div>
+    </div>
+    <div class="rate-box">成功率: <span id="percent">0</span>%</div>
+    <div class="btn-grid">
+        <button id="startBtn" class="start">START</button>
+        <button id="stopBtn" class="stop">STOP</button>
+        <button id="inBtn" class="in" disabled>IN</button>
+        <button id="outBtn" class="out" disabled>OUT</button>
+        <button id="resetBtn" class="reset">リセット</button>
+    </div>
+</div>
+<script>
+    var inNum = 0, outNum = 0, startTime = 0, timerId = null, pausedTime = 0;
+    var elTimer = document.getElementById('timer'), elTotal = document.getElementById('total'), elInCount = document.getElementById('in-count'), elOutCount = document.getElementById('out-count'), elPercent = document.getElementById('percent');
+    var btnStart = document.getElementById('startBtn'), btnStop = document.getElementById('stopBtn'), btnIn = document.getElementById('inBtn'), btnOut = document.getElementById('outBtn'), btnReset = document.getElementById('resetBtn');
+    function tick() {
+        var diff = Date.now() - startTime;
+        var m = Math.floor(diff / 60000), s = Math.floor((diff % 60000) / 1000), ms = Math.floor((diff % 1000) / 100);
+        elTimer.innerHTML = ("0" + m).slice(-2) + ":" + ("0" + s).slice(-2) + "." + ms;
+    }
+    btnStart.onclick = function() {
+        startTime = Date.now() - pausedTime;
+        timerId = setInterval(tick, 100);
+        btnStart.style.display = 'none'; btnStop.style.display = 'block';
+        btnIn.disabled = false; btnOut.disabled = false;
+    };
+    btnStop.onclick = function() {
+        clearInterval(timerId); pausedTime = Date.now() - startTime;
+        btnStart.style.display = 'block'; btnStart.innerHTML = '再開';
+        btnStop.style.display = 'none'; btnIn.disabled = true; btnOut.disabled = true;
+    };
+    btnIn.onclick = function() { inNum++; update(); };
+    btnOut.onclick = function() { outNum++; update(); };
+    btnReset.onclick = function() {
+        if (confirm("リセットしますか？")) {
+            clearInterval(timerId); inNum = 0; outNum = 0; pausedTime = 0;
+            elTimer.innerHTML = "00:00.0"; btnStart.style.display = 'block'; btnStart.innerHTML = 'START';
+            btnStop.style.display = 'none'; btnIn.disabled = true; btnOut.disabled = true; update();
+        }
+    };
+    function update() {
+        var total = inNum + outNum;
+        elInCount.innerHTML = inNum; elOutCount.innerHTML = outNum; elTotal.innerHTML = total;
+        elPercent.innerHTML = total === 0 ? 0 : Math.round((inNum / total) * 100);
+    }
+</script>
+</body>
+</html>
