@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>シュートカウンター</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js');
+      }
+    </script>
+
+    <style>
+        /* ボタンの反応を最優先にする設定 */
+        * {
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body {
+            font-family: -apple-system, sans-serif;
+            text-align: center;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            max-width: 360px;
+            margin: auto;
+        }
+
+        #timer {
+            font-size: 3rem;
+            font-weight: bold;
+            font-family: 'Courier New', Courier, monospace;
+            margin: 10px 0;
+            color: #2c3e50;
+        }
+
+        .total-box { margin: 10px 0; }
+        #total { font-size: 5.5rem; font-weight: bold; color: #333; line-height: 1; margin: 5px 0; }
+        
+        .results {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .rate-box {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #e67e22;
+            margin-bottom: 20px;
+        }
+
+        .btn-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        button {
+            -webkit-appearance: none;
+            appearance: none;
+            padding: 20px 0;
+            font-size: 1.5rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 15px;
+            color: white;
+            cursor: pointer;
+        }
+
+        button:active {
+            opacity: 0.6;
+            transform: scale(0.96);
+        }
+
+        .start { background-color: #3498db; grid-column: span 2; }
+        .stop { background-color: #f1c40f; color: #333; grid-column: span 2; display: none; }
+        .in { background-color: #2ecc71; }
+        .out { background-color: #e74c3c; }
+        .reset { background-color: #bdc3c7; grid-column: span 2; margin-top: 20px; font-size: 1rem; padding: 10px; }
+
+        button:disabled {
+            background-color: #ccc !important;
+            opacity: 0.3;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="timer">00:00.0</div>
+    
+    <div class="total-box">
+        <div style="color:#666; font-weight:bold;">TOTAL SHOTS</div>
+        <div id="total">0</div>
+    </div>
+
+    <div class="results">
+        <div style="color:#2ecc71">IN: <span id="in-count">0</span></div>
+        <div style="color:#e74c3c">OUT: <span id="out-count">0</span></div>
+    </div>
+
+    <div class="rate-box">成功率: <span id="percent">0</span>%</div>
+
+    <div class="btn-grid">
+        <button id="startBtn" class="start">START</button>
+        <button id="stopBtn" class
